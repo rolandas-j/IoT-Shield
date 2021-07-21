@@ -1,8 +1,9 @@
 package com.rolandas.jasiunas.coding.iotshield;
 
-import com.rolandas.jasiunas.coding.iotshield.actions.ActionDetails;
+import com.rolandas.jasiunas.coding.iotshield.actions.ActionType;
 import com.rolandas.jasiunas.coding.iotshield.models.BlacklistProperty;
 import com.rolandas.jasiunas.coding.iotshield.models.WhitelistProperty;
+import com.rolandas.jasiunas.coding.iotshield.models.device.Device;
 import com.rolandas.jasiunas.coding.iotshield.models.device.DeviceProfile;
 import com.rolandas.jasiunas.coding.iotshield.models.events.RequestEvent;
 import java.util.Set;
@@ -11,71 +12,62 @@ public class RequestProcessor {
 
   private static final RequestProcessor INSTANCE = new RequestProcessor();
   private DeviceManager deviceManager;
-  private ResponseExecutor responseExecutor;
 
   private RequestProcessor() {
-
     deviceManager = DeviceManager.getInstance();
-    responseExecutor = ResponseExecutor.getInstance();
   }
 
   public static RequestProcessor getInstance() {
     return INSTANCE;
   }
 
-  public void handleRequest(RequestEvent event) {
-    System.out.printf("Request got %s %n", event.getRequestId());
-
-    deviceManager
-        .getDeviceProfile(event.getModelName())
-        .ifPresentOrElse(
-            (deviceProfile) -> handleRequest(event, deviceProfile),
-            () -> responseExecutor.allow(event, ActionDetails.DEVICE_HAS_NO_ACTIVE_PROFILE));
-  }
-
-  public void handleRequest(RequestEvent event, DeviceProfile deviceProfile) {
-    if (deviceManager.isDeviceActive(event.getDeviceId())) {
-      filterByProfile(deviceProfile, event);
-      return;
+  public ActionType handleRequest(RequestEvent event) {
+    Device device = deviceManager.getOrRegisterDevice(event.getDeviceId(), event.getModelName());
+    if (device.isActive()) {
+      return filterRequestByProfile(event);
     }
 
-    responseExecutor.block(event, ActionDetails.DEVICE_IN_QUARANTINE);
+    return ActionType.BLOCK;
   }
 
-  private void filterByProfile(DeviceProfile deviceProfile, RequestEvent event) {
+  private ActionType filterRequestByProfile(RequestEvent event) {
+    return deviceManager
+        .getDeviceProfile(event.getModelName())
+        .map(deviceProfile -> filterRequestByProfile(deviceProfile, event))
+        .orElse(ActionType.ALLOW);
+  }
+
+  private ActionType filterRequestByProfile(DeviceProfile deviceProfile, RequestEvent event) {
     switch (deviceProfile.getDefaultPolicy()) {
       case ALLOW:
-        validateBlacklist(deviceProfile.getBlacklist(), event);
-        break;
+        return filterByBlacklist(deviceProfile.getBlacklist(), event);
       case BLOCK:
-        validateWhitelist(deviceProfile.getWhitelist(), event);
-        break;
+        return filterByWhitelist(deviceProfile.getWhitelist(), event);
     }
+
+    throw new IllegalStateException("Unknown device profile");
   }
 
-  private void validateBlacklist(Set<BlacklistProperty> blacklist, RequestEvent event) {
+  private ActionType filterByBlacklist(Set<BlacklistProperty> blacklist, RequestEvent event) {
     boolean blacklisted =
         blacklist.stream()
             .anyMatch(blacklistProperty -> blacklistProperty.getValue().equals(event.getUrl()));
     if (blacklisted) {
-      responseExecutor.block(event);
-      return;
+      return ActionType.BLOCK;
     }
 
-    responseExecutor.allow(event);
+    return ActionType.ALLOW;
   }
 
-  private void validateWhitelist(Set<WhitelistProperty> whitelist, RequestEvent event) {
+  private ActionType filterByWhitelist(Set<WhitelistProperty> whitelist, RequestEvent event) {
     boolean whitelisted =
         whitelist.stream()
             .anyMatch(whitelistProperty -> whitelistProperty.getValue().equals(event.getUrl()));
 
     if (whitelisted) {
-      responseExecutor.allow(event);
-      return;
+      return ActionType.ALLOW;
     }
 
-    deviceManager.quarantineDevice(event.getDeviceId());
-    responseExecutor.quarantine(event.getDeviceId());
+    return ActionType.QUARANTINE;
   }
 }

@@ -8,6 +8,7 @@ import com.rolandas.jasiunas.coding.iotshield.models.events.ProfileCreateEvent;
 import com.rolandas.jasiunas.coding.iotshield.models.events.ProfileLifecycleEvent;
 import com.rolandas.jasiunas.coding.iotshield.models.events.ProfileUpdateEvent;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -29,17 +30,20 @@ public class DeviceManager {
     activeProfiles.put(deviceProfile.getModelName(), deviceProfile);
   }
 
-  public Device registerDevice(String deviceId) {
-    Device device = Device.createDevice(deviceId);
-    devices.put(deviceId, device);
+  public Device registerDevice(Device device) {
+    devices.put(device.getId(), device);
 
     return device;
   }
 
-  public boolean isDeviceActive(String deviceId) {
-    Device device = getDevice(deviceId).orElseGet(() -> registerDevice(deviceId));
+  public Device registerDevice(String deviceId, String modelName) {
+    Device device = Device.createDevice(deviceId, modelName);
 
-    return device.isActive();
+    return registerDevice(device);
+  }
+
+  public Device getOrRegisterDevice(String deviceId, String modelName) {
+    return getDevice(deviceId).orElseGet(() -> registerDevice(deviceId, modelName));
   }
 
   public void quarantineDevice(String deviceId) {
@@ -98,16 +102,28 @@ public class DeviceManager {
     Set<WhitelistProperty> updatedWhitelist =
         Optional.ofNullable(profileUpdateEvent.getWhitelist())
             .map(this::mapToWhitelistCollection)
-            .orElse(currentProfile.getWhitelist());
+            .orElse(Collections.emptySet());
 
     Set<BlacklistProperty> updatedBlacklist =
         Optional.ofNullable(profileUpdateEvent.getBlacklist())
             .map(this::mapToBlacklistCollection)
-            .orElse(currentProfile.getBlacklist());
+            .orElse(Collections.emptySet());
     DeviceProfile updatedProfile =
         currentProfile.withUpdatedConfig(updatedWhitelist, updatedBlacklist);
 
-    registerDeviceProfile(updatedProfile);
+    updateProfileAndRemoveQuarantine(updatedProfile);
+  }
+
+  private void updateProfileAndRemoveQuarantine(DeviceProfile deviceProfile) {
+    Set<Device> devicesInQuarantine =
+        devices.values().stream()
+            .filter(Device::inQuarantine)
+            .filter(deviceProfile::matchesDevice)
+            .collect(Collectors.toSet());
+
+    devicesInQuarantine.stream().map(Device::activate).forEach(this::registerDevice);
+
+    registerDeviceProfile(deviceProfile);
   }
 
   private Set<WhitelistProperty> mapToWhitelistCollection(Collection<String> stringList) {

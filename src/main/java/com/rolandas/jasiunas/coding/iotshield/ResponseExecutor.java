@@ -1,6 +1,10 @@
 package com.rolandas.jasiunas.coding.iotshield;
 
+import com.rolandas.jasiunas.coding.iotshield.actions.ActionType;
+import com.rolandas.jasiunas.coding.iotshield.actions.DeviceAction;
+import com.rolandas.jasiunas.coding.iotshield.actions.RequestAction;
 import com.rolandas.jasiunas.coding.iotshield.models.events.RequestEvent;
+import com.rolandas.jasiunas.coding.iotshield.output.OutputFileWriter;
 
 public class ResponseExecutor {
 
@@ -17,7 +21,9 @@ public class ResponseExecutor {
   }
 
   public void allow(RequestEvent request, String details) {
-    System.out.println("Allow");
+    RequestAction action = new RequestAction(request.getDeviceId(), ActionType.ALLOW);
+
+    OutputFileWriter.getInstance().write(action);
   }
 
   public void block(RequestEvent request) {
@@ -25,10 +31,14 @@ public class ResponseExecutor {
   }
 
   public void block(RequestEvent request, String details) {
-    System.out.println("Block");
+    RequestAction action = new RequestAction(request.getRequestId(), ActionType.BLOCK);
+
+    OutputFileWriter.getInstance().write(action);
   }
 
   public void quarantine(String deviceId) {
-    System.out.println("Quarantine");
+    DeviceAction action = new DeviceAction(deviceId, ActionType.QUARANTINE);
+
+    OutputFileWriter.getInstance().write(action);
   }
 }

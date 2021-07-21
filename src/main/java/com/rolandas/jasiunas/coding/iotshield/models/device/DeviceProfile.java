@@ -60,4 +60,8 @@ public class DeviceProfile {
         + blacklist
         + '}';
   }
+
+  public boolean matchesDevice(Device device) {
+    return device.getModelName().equals(getModelName());
+  }
 }

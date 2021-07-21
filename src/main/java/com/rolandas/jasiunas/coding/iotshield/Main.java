@@ -1,11 +1,10 @@
 package com.rolandas.jasiunas.coding.iotshield;
 
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.rolandas.jasiunas.coding.iotshield.models.events.DeviceEvent;
-
+import com.rolandas.jasiunas.coding.iotshield.output.OutputFileWriter;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,16 +17,18 @@ public class Main {
 
     final IotShield iotShield = new IotShield();
 
-    readDeviceEvents(iotShield);
+    try (final OutputFileWriter fileWriter = OutputFileWriter.initialize()) {
+      readDeviceEvents(iotShield);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
 
     iotShield.getEvents();
   }
 
   public static void readDeviceEvents(IotShield shield) {
-    ObjectMapper objectMapper =
-        new ObjectMapper()
-            .registerModule(new ParameterNamesModule())
-            .registerModule(new Jdk8Module());
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS);
 
     InputStream inputStream = Main.class.getResourceAsStream("/input.json");
     InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
