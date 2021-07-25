@@ -1,9 +1,13 @@
-package com.rolandas.jasiunas.coding.iotshield.actions;
+package com.rolandas.jasiunas.coding.iotshield.models.actions;
 
 import java.util.Objects;
 
 public class DeviceAction extends Action {
   private final String deviceId;
+
+  public static DeviceAction quarantine(String deviceId) {
+    return new DeviceAction(deviceId, ActionType.QUARANTINE);
+  }
 
   public DeviceAction(String deviceId, ActionType action) {
     super(action);

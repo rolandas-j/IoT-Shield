@@ -1,9 +1,17 @@
-package com.rolandas.jasiunas.coding.iotshield.actions;
+package com.rolandas.jasiunas.coding.iotshield.models.actions;
 
 import java.util.Objects;
 
 public class RequestAction extends Action {
   private final String requestId;
+
+  public static RequestAction block(String requestId) {
+    return new RequestAction(requestId, ActionType.BLOCK);
+  }
+
+  public static RequestAction allow(String requestId) {
+    return new RequestAction(requestId, ActionType.ALLOW);
+  }
 
   public RequestAction(String requestId, ActionType action) {
     super(action);

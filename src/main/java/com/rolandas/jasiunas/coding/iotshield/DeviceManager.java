@@ -16,14 +16,25 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DeviceManager {
-  private static final DeviceManager INSTANCE = new DeviceManager();
-  public Map<String, DeviceProfile> activeProfiles = new HashMap<>();
-  public Map<String, Device> devices = new HashMap<>();
+  public Map<String, DeviceProfile> activeProfiles;
+  public Map<String, Device> devices;
 
-  private DeviceManager() {}
+  public DeviceManager() {
+    activeProfiles = new HashMap<>();
+    devices = new HashMap<>();
+  }
 
-  public static DeviceManager getInstance() {
-    return INSTANCE;
+  private DeviceManager(Map<String, DeviceProfile> activeProfiles, Map<String, Device> devices) {
+    this.activeProfiles = activeProfiles;
+    this.devices = devices;
+  }
+
+  public DeviceManager withCopyOfCurrentProfileState() {
+    return new DeviceManager(new HashMap<>(activeProfiles), new HashMap<>());
+  }
+
+  public int getProtectedDevices() {
+    return devices.size();
   }
 
   public void registerDeviceProfile(DeviceProfile deviceProfile) {
@@ -34,12 +45,6 @@ public class DeviceManager {
     devices.put(device.getId(), device);
 
     return device;
-  }
-
-  public Device registerDevice(String deviceId, String modelName) {
-    Device device = Device.createDevice(deviceId, modelName);
-
-    return registerDevice(device);
   }
 
   public Device getOrRegisterDevice(String deviceId, String modelName) {
@@ -74,6 +79,12 @@ public class DeviceManager {
     throw new IllegalArgumentException(
         String.format(
             "Unknown profile lifecycle event: %s", profileLifecycleEvent.getClass().getName()));
+  }
+
+  private Device registerDevice(String deviceId, String modelName) {
+    Device device = Device.createDevice(deviceId, modelName);
+
+    return registerDevice(device);
   }
 
   private void handleProfileCreate(ProfileCreateEvent profileCreateEvent) {

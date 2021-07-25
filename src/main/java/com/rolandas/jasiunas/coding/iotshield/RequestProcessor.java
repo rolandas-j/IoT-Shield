@@ -1,24 +1,30 @@
 package com.rolandas.jasiunas.coding.iotshield;
 
-import com.rolandas.jasiunas.coding.iotshield.actions.ActionType;
 import com.rolandas.jasiunas.coding.iotshield.models.BlacklistProperty;
 import com.rolandas.jasiunas.coding.iotshield.models.WhitelistProperty;
+import com.rolandas.jasiunas.coding.iotshield.models.actions.ActionType;
 import com.rolandas.jasiunas.coding.iotshield.models.device.Device;
 import com.rolandas.jasiunas.coding.iotshield.models.device.DeviceProfile;
 import com.rolandas.jasiunas.coding.iotshield.models.events.RequestEvent;
 import java.util.Set;
+import javax.inject.Inject;
 
 public class RequestProcessor {
 
-  private static final RequestProcessor INSTANCE = new RequestProcessor();
-  private DeviceManager deviceManager;
+  private final DeviceManager deviceManager;
 
-  private RequestProcessor() {
-    deviceManager = DeviceManager.getInstance();
+  @Inject
+  public RequestProcessor(DeviceManager deviceManager) {
+    this.deviceManager = deviceManager;
   }
 
-  public static RequestProcessor getInstance() {
-    return INSTANCE;
+  public RequestProcessor buildReplayableProcessor() {
+    DeviceManager managerWithProfiles = deviceManager.withCopyOfCurrentProfileState();
+    return new RequestProcessor(managerWithProfiles);
+  }
+
+  public int getProtectedDevices() {
+    return deviceManager.getProtectedDevices();
   }
 
   public ActionType handleRequest(RequestEvent event) {
@@ -51,7 +57,11 @@ public class RequestProcessor {
   private ActionType filterByBlacklist(Set<BlacklistProperty> blacklist, RequestEvent event) {
     boolean blacklisted =
         blacklist.stream()
-            .anyMatch(blacklistProperty -> blacklistProperty.getValue().equals(event.getUrl()));
+            .anyMatch(
+                blacklistProperty ->
+                    blacklistProperty
+                        .getValue()
+                        .equals(event.getUrl())); // FIXME this is blacklist logic, should be moved
     if (blacklisted) {
       return ActionType.BLOCK;
     }
@@ -62,12 +72,17 @@ public class RequestProcessor {
   private ActionType filterByWhitelist(Set<WhitelistProperty> whitelist, RequestEvent event) {
     boolean whitelisted =
         whitelist.stream()
-            .anyMatch(whitelistProperty -> whitelistProperty.getValue().equals(event.getUrl()));
+            .anyMatch(
+                whitelistProperty ->
+                    whitelistProperty
+                        .getValue()
+                        .equals(event.getUrl())); // FIXME this is whitelist logic, should be moved
 
     if (whitelisted) {
       return ActionType.ALLOW;
     }
 
+    deviceManager.quarantineDevice(event.getDeviceId());
     return ActionType.QUARANTINE;
   }
 }

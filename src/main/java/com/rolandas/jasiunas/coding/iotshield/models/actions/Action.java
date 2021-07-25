@@ -1,4 +1,4 @@
-package com.rolandas.jasiunas.coding.iotshield.actions;
+package com.rolandas.jasiunas.coding.iotshield.models.actions;
 
 import java.util.Objects;
 
