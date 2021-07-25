@@ -7,7 +7,7 @@ public enum ActionType {
   BLOCK("block"),
   QUARANTINE("quarantine");
 
-  private String value;
+  private final String value;
 
   ActionType(String value) {
     this.value = value;

@@ -1,32 +1,26 @@
 package com.rolandas.jasiunas.coding.iotshield.models.device;
 
-import com.rolandas.jasiunas.coding.iotshield.models.BlacklistProperty;
-import com.rolandas.jasiunas.coding.iotshield.models.WhitelistProperty;
-import java.util.Collections;
-import java.util.Set;
+import com.rolandas.jasiunas.coding.iotshield.models.security.Blacklist;
+import com.rolandas.jasiunas.coding.iotshield.models.security.Whitelist;
 import javax.validation.constraints.NotNull;
 
 public class DeviceProfile {
 
   private final String modelName;
   private final DevicePolicy defaultPolicy;
-  private final Set<WhitelistProperty> whitelist;
-  private final Set<BlacklistProperty> blacklist;
+  private final Whitelist whitelist;
+  private final Blacklist blacklist;
 
   public DeviceProfile(
-      String modelName,
-      DevicePolicy defaultPolicy,
-      Set<WhitelistProperty> whitelist,
-      Set<BlacklistProperty> blacklist) {
+      String modelName, DevicePolicy defaultPolicy, Whitelist whitelist, Blacklist blacklist) {
     this.modelName = modelName;
     this.defaultPolicy = defaultPolicy;
-    this.whitelist = Collections.unmodifiableSet(whitelist);
-    this.blacklist = Collections.unmodifiableSet(blacklist);
+    this.whitelist = whitelist;
+    this.blacklist = blacklist;
   }
 
   public DeviceProfile withUpdatedConfig(
-      @NotNull Set<WhitelistProperty> updatedWhitelist,
-      @NotNull Set<BlacklistProperty> updatedBlacklist) {
+      @NotNull Whitelist updatedWhitelist, @NotNull Blacklist updatedBlacklist) {
     return new DeviceProfile(modelName, defaultPolicy, updatedWhitelist, updatedBlacklist);
   }
 
@@ -38,11 +32,11 @@ public class DeviceProfile {
     return defaultPolicy;
   }
 
-  public Set<WhitelistProperty> getWhitelist() {
+  public Whitelist getWhitelist() {
     return whitelist;
   }
 
-  public Set<BlacklistProperty> getBlacklist() {
+  public Blacklist getBlacklist() {
     return blacklist;
   }
 

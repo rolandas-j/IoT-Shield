@@ -1,14 +1,12 @@
 package com.rolandas.jasiunas.coding.iotshield;
 
-import com.rolandas.jasiunas.coding.iotshield.models.BlacklistProperty;
-import com.rolandas.jasiunas.coding.iotshield.models.WhitelistProperty;
 import com.rolandas.jasiunas.coding.iotshield.models.device.Device;
 import com.rolandas.jasiunas.coding.iotshield.models.device.DeviceProfile;
 import com.rolandas.jasiunas.coding.iotshield.models.events.ProfileCreateEvent;
 import com.rolandas.jasiunas.coding.iotshield.models.events.ProfileLifecycleEvent;
 import com.rolandas.jasiunas.coding.iotshield.models.events.ProfileUpdateEvent;
-import java.util.Collection;
-import java.util.Collections;
+import com.rolandas.jasiunas.coding.iotshield.models.security.Blacklist;
+import com.rolandas.jasiunas.coding.iotshield.models.security.Whitelist;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -88,8 +86,8 @@ public class DeviceManager {
   }
 
   private void handleProfileCreate(ProfileCreateEvent profileCreateEvent) {
-    Set<WhitelistProperty> whiteList = mapToWhitelistCollection(profileCreateEvent.getWhitelist());
-    Set<BlacklistProperty> blacklist = mapToBlacklistCollection(profileCreateEvent.getBlacklist());
+    Whitelist whiteList = Whitelist.create(profileCreateEvent.getWhitelist());
+    Blacklist blacklist = Blacklist.create(profileCreateEvent.getBlacklist());
     DeviceProfile deviceProfile =
         new DeviceProfile(
             profileCreateEvent.getModelName(),
@@ -110,15 +108,15 @@ public class DeviceManager {
                             "Profile for device %s is not available",
                             profileUpdateEvent.getModelName())));
 
-    Set<WhitelistProperty> updatedWhitelist =
+    Whitelist updatedWhitelist =
         Optional.ofNullable(profileUpdateEvent.getWhitelist())
-            .map(this::mapToWhitelistCollection)
-            .orElse(Collections.emptySet());
+            .map(Whitelist::create)
+            .orElse(Whitelist.EMPTY);
 
-    Set<BlacklistProperty> updatedBlacklist =
+    Blacklist updatedBlacklist =
         Optional.ofNullable(profileUpdateEvent.getBlacklist())
-            .map(this::mapToBlacklistCollection)
-            .orElse(Collections.emptySet());
+            .map(Blacklist::create)
+            .orElse(Blacklist.EMPTY);
     DeviceProfile updatedProfile =
         currentProfile.withUpdatedConfig(updatedWhitelist, updatedBlacklist);
 
@@ -135,13 +133,5 @@ public class DeviceManager {
     devicesInQuarantine.stream().map(Device::activate).forEach(this::registerDevice);
 
     registerDeviceProfile(deviceProfile);
-  }
-
-  private Set<WhitelistProperty> mapToWhitelistCollection(Collection<String> stringList) {
-    return stringList.stream().map(WhitelistProperty::new).collect(Collectors.toSet());
-  }
-
-  private Set<BlacklistProperty> mapToBlacklistCollection(Collection<String> stringList) {
-    return stringList.stream().map(BlacklistProperty::new).collect(Collectors.toSet());
   }
 }
