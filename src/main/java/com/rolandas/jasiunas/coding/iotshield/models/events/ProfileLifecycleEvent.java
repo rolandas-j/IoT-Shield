@@ -14,6 +14,14 @@ public abstract class ProfileLifecycleEvent extends DeviceEvent {
     this.blacklist = blacklist;
   }
 
+  public Set<String> getWhitelist() {
+    return whitelist;
+  }
+
+  public Set<String> getBlacklist() {
+    return blacklist;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -32,13 +40,5 @@ public abstract class ProfileLifecycleEvent extends DeviceEvent {
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), whitelist, blacklist);
-  }
-
-  public Set<String> getWhitelist() {
-    return whitelist;
-  }
-
-  public Set<String> getBlacklist() {
-    return blacklist;
   }
 }

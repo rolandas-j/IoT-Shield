@@ -17,4 +17,18 @@ public class ProfileUpdateEvent extends ProfileLifecycleEvent {
       @JsonProperty("blacklist") Set<String> blacklist) {
     super(modelName, timestamp, whitelist, blacklist);
   }
+
+  @Override
+  public String toString() {
+    return "ProfileUpdateEvent{"
+        + "whitelist="
+        + getWhitelist()
+        + ", blacklist="
+        + getBlacklist()
+        + ", modelName='"
+        + getModelName()
+        + ", timestamp="
+        + getTimestamp()
+        + "}";
+  }
 }

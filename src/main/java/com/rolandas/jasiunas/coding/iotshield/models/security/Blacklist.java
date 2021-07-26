@@ -14,4 +14,14 @@ public class Blacklist extends SecurityList {
   private Blacklist(Set<String> securedUrls) {
     super(securedUrls, ActionType.BLOCK);
   }
+
+  @Override
+  public String toString() {
+    return "Blacklist{"
+        + "securedUrls="
+        + getSecuredUrls()
+        + ", listAction="
+        + getListAction()
+        + '}';
+  }
 }

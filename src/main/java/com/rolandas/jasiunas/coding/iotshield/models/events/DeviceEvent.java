@@ -3,7 +3,6 @@ package com.rolandas.jasiunas.coding.iotshield.models.events;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
 import java.util.Objects;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
@@ -24,6 +23,14 @@ public abstract class DeviceEvent {
     this.timestamp = timestamp;
   }
 
+  public String getModelName() {
+    return modelName;
+  }
+
+  public Long getTimestamp() {
+    return timestamp;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -39,13 +46,5 @@ public abstract class DeviceEvent {
   @Override
   public int hashCode() {
     return Objects.hash(modelName, timestamp);
-  }
-
-  public String getModelName() {
-    return modelName;
-  }
-
-  public Long getTimestamp() {
-    return timestamp;
   }
 }

@@ -44,6 +44,6 @@ public class RequestAction extends Action {
 
   @Override
   public String toString() {
-    return "RequestAction{" + "requestId='" + requestId + '\'' + "} " + super.toString();
+    return "RequestAction{" + "requestId=" + requestId + ", action=" + getAction() + '}';
   }
 }

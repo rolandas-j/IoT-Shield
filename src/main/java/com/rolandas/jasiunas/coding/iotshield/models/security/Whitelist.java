@@ -15,4 +15,24 @@ public class Whitelist extends SecurityList {
   private Whitelist(Set<String> securedUrls) {
     super(securedUrls, ActionType.ALLOW);
   }
+
+  @Override
+  public boolean equals(Object o) {
+    return super.equals(o);
+  }
+
+  @Override
+  public int hashCode() {
+    return super.hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return "Whitelist{"
+        + "securedUrls="
+        + getSecuredUrls()
+        + ", listAction="
+        + getListAction()
+        + '}';
+  }
 }

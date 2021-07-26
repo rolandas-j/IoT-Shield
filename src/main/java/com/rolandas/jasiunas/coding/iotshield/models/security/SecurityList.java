@@ -28,6 +28,14 @@ public abstract class SecurityList {
     return Optional.empty();
   }
 
+  public Set<String> getSecuredUrls() {
+    return securedUrls;
+  }
+
+  public ActionType getListAction() {
+    return listAction;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -43,10 +51,5 @@ public abstract class SecurityList {
   @Override
   public int hashCode() {
     return Objects.hash(securedUrls, listAction);
-  }
-
-  @Override
-  public String toString() {
-    return "SecurityList{" + "internalList=" + securedUrls + ", listAction=" + listAction + '}';
   }
 }

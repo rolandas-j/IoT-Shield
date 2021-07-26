@@ -25,6 +25,10 @@ public class ProfileCreateEvent extends ProfileLifecycleEvent {
     this.defaultPolicy = defaultPolicy;
   }
 
+  public DevicePolicy getDefaultPolicy() {
+    return defaultPolicy;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -45,7 +49,19 @@ public class ProfileCreateEvent extends ProfileLifecycleEvent {
     return Objects.hash(super.hashCode(), defaultPolicy);
   }
 
-  public DevicePolicy getDefaultPolicy() {
-    return defaultPolicy;
+  @Override
+  public String toString() {
+    return "ProfileCreateEvent{"
+        + "defaultPolicy="
+        + defaultPolicy
+        + ", whitelist="
+        + getWhitelist()
+        + ", blacklist="
+        + getBlacklist()
+        + ", modelName='"
+        + getModelName()
+        + ", timestamp="
+        + getTimestamp()
+        + "} ";
   }
 }

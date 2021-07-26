@@ -40,6 +40,6 @@ public class DeviceAction extends Action {
 
   @Override
   public String toString() {
-    return "DeviceAction{" + "deviceId='" + deviceId + '\'' + "} " + super.toString();
+    return "DeviceAction{" + "deviceId=" + deviceId + ", action=" + getAction() + '}';
   }
 }

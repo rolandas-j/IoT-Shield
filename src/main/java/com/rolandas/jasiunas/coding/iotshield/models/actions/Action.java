@@ -29,9 +29,4 @@ public abstract class Action {
   public int hashCode() {
     return Objects.hash(action);
   }
-
-  @Override
-  public String toString() {
-    return "Action{" + "action=" + action + '}';
-  }
 }

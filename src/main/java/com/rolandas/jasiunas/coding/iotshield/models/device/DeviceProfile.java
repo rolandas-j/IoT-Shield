@@ -2,6 +2,7 @@ package com.rolandas.jasiunas.coding.iotshield.models.device;
 
 import com.rolandas.jasiunas.coding.iotshield.models.security.Blacklist;
 import com.rolandas.jasiunas.coding.iotshield.models.security.Whitelist;
+import java.util.Objects;
 import javax.validation.constraints.NotNull;
 
 public class DeviceProfile {
@@ -40,6 +41,10 @@ public class DeviceProfile {
     return blacklist;
   }
 
+  public boolean matchesDevice(Device device) {
+    return device.getModelName().equals(getModelName());
+  }
+
   @Override
   public String toString() {
     return "DeviceProfile{"
@@ -55,7 +60,23 @@ public class DeviceProfile {
         + '}';
   }
 
-  public boolean matchesDevice(Device device) {
-    return device.getModelName().equals(getModelName());
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    DeviceProfile that = (DeviceProfile) o;
+    return Objects.equals(modelName, that.modelName)
+        && defaultPolicy == that.defaultPolicy
+        && Objects.equals(whitelist, that.whitelist)
+        && Objects.equals(blacklist, that.blacklist);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(modelName, defaultPolicy, whitelist, blacklist);
   }
 }
