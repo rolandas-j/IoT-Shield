@@ -35,14 +35,8 @@ public class DeviceManager {
     return devices.size();
   }
 
-  public void registerDeviceProfile(DeviceProfile deviceProfile) {
-    activeProfiles.put(deviceProfile.getModelName(), deviceProfile);
-  }
-
-  public Device registerDevice(Device device) {
-    devices.put(device.getId(), device);
-
-    return device;
+  public Optional<Device> getDevice(String deviceId) {
+    return Optional.ofNullable(devices.get(deviceId));
   }
 
   public Device getOrRegisterDevice(String deviceId, String modelName) {
@@ -60,10 +54,6 @@ public class DeviceManager {
     return Optional.ofNullable(activeProfiles.get(modelName));
   }
 
-  public Optional<Device> getDevice(String deviceId) {
-    return Optional.ofNullable(devices.get(deviceId));
-  }
-
   public void handleProfileLifecycleEvent(ProfileLifecycleEvent profileLifecycleEvent) {
     if (profileLifecycleEvent instanceof ProfileUpdateEvent) {
       handleProfileUpdate((ProfileUpdateEvent) profileLifecycleEvent);
@@ -79,10 +69,20 @@ public class DeviceManager {
             "Unknown profile lifecycle event: %s", profileLifecycleEvent.getClass().getName()));
   }
 
+  private void registerDeviceProfile(DeviceProfile deviceProfile) {
+    activeProfiles.put(deviceProfile.getModelName(), deviceProfile);
+  }
+
   private Device registerDevice(String deviceId, String modelName) {
     Device device = Device.createDevice(deviceId, modelName);
 
     return registerDevice(device);
+  }
+
+  private Device registerDevice(Device device) {
+    devices.put(device.getId(), device);
+
+    return device;
   }
 
   private void handleProfileCreate(ProfileCreateEvent profileCreateEvent) {
